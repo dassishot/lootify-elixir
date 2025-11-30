@@ -72,7 +72,7 @@ services:
       - COOKIE=lootify_cookie
       - DATABASE_URL=ecto://postgres:postgres@postgres/users
     depends_on:
-      - postgres
+      - users-db
     networks:
       - lootify-net
 
@@ -86,7 +86,7 @@ services:
       - COOKIE=lootify_cookie
       - DATABASE_URL=ecto://postgres:postgres@postgres/wallets
     depends_on:
-      - postgres
+      - wallets-db
     networks:
       - lootify-net
 
@@ -100,7 +100,7 @@ services:
       - COOKIE=lootify_cookie
       - DATABASE_URL=ecto://postgres:postgres@postgres/bets
     depends_on:
-      - postgres
+      - bets-db
     networks:
       - lootify-net
 
