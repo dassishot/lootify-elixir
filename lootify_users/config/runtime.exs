@@ -20,18 +20,13 @@ if config_env() == :prod do
     issuer: "lootify_users",
     secret_key: secret_key
 
-  # Configuração de cluster para distributed erlang (Docker)
+  # Cluster com nomes curtos
   config :libcluster,
     topologies: [
       docker: [
         strategy: Cluster.Strategy.Epmd,
         config: [
-          hosts: [
-            :"wallets@wallets.lootify.local",
-            :"users@users.lootify.local",
-            :"bets@bets.lootify.local",
-            :"gateway@gateway.lootify.local"
-          ]
+          hosts: [:wallets@wallets, :users@users, :bets@bets, :gateway@gateway]
         ]
       ]
     ]
