@@ -3,6 +3,10 @@ import Config
 config :lootify_users,
   ecto_repos: [LootifyUsers.Repo]
 
+# PBKDF2 config - reduzir rounds para dev (produção usar 160_000)
+config :pbkdf2_elixir,
+  rounds: 20_000
+
 config :lootify_users, LootifyUsers.Repo,
   database: "lootify_users_dev",
   username: "postgres",
