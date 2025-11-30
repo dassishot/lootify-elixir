@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lootify-network
+      - lootify-net
 
   users-db:
     image: postgres:16-alpine
@@ -38,7 +38,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lootify-network
+      - lootify-net
 
   bets-db:
     image: postgres:16-alpine
@@ -57,7 +57,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - lootify-network
+      - lootify-net
 
   # ===============================
   # Serviços Elixir
@@ -122,5 +122,5 @@ volumes:
   bets_data:
 
 networks:
-  lootify-network:
+  lootify-net:
     driver: bridge
