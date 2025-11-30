@@ -1,0 +1,180 @@
+services:
+  # ===============================
+  # Bancos de dados
+  # ===============================
+  wallets-db:
+    image: postgres:16-alpine
+    container_name: lootify-wallets-db
+    environment:
+      POSTGRES_DB: lootify_wallets_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - wallets_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lootify-network
+
+  users-db:
+    image: postgres:16-alpine
+    container_name: lootify-users-db
+    environment:
+      POSTGRES_DB: lootify_users_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lootify-network
+
+  bets-db:
+    image: postgres:16-alpine
+    container_name: lootify-bets-db
+    environment:
+      POSTGRES_DB: lootify_bets_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - bets_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lootify-network
+
+  # ===============================
+  # Serviços Elixir
+  # ===============================
+  wallets:
+    build:
+      context: ./lootify_wallets
+      dockerfile: Dockerfile
+    container_name: lootify-wallets
+    hostname: wallets.lootify.local
+    environment:
+      DATABASE_URL: ecto://postgres:postgres@wallets-db:5432/lootify_wallets_dev
+      POOL_SIZE: "10"
+      ERLANG_COOKIE: lootify_super_secret_cookie
+      # Configuração de rede Erlang
+      ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min 9000 inet_dist_listen_max 9010"
+    expose:
+      - "4369"
+      - "9101"  
+    depends_on:
+      wallets-db:
+        condition: service_healthy
+    networks:
+      lootify-network:
+        aliases:
+          - wallets.lootify.local
+    restart: unless-stopped
+
+  users:
+    build:
+      context: ./lootify_users
+      dockerfile: Dockerfile
+    container_name: lootify-users
+    hostname: users.lootify.local
+    environment:
+      DATABASE_URL: ecto://postgres:postgres@users-db:5432/lootify_users_dev
+      POOL_SIZE: "10"
+      ERLANG_COOKIE: lootify_super_secret_cookie
+      GUARDIAN_SECRET_KEY: super_secret_key_for_jwt_tokens_change_in_production
+      ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min 9000 inet_dist_listen_max 9010"
+    expose:
+      - "4369"
+      - "9101"
+    depends_on:
+      users-db:
+        condition: service_healthy
+    networks:
+      lootify-network:
+        aliases:
+          - users.lootify.local
+    restart: unless-stopped
+
+  bets:
+    build:
+      context: ./lootify_bets
+      dockerfile: Dockerfile
+    container_name: lootify-bets
+    hostname: bets.lootify.local
+    environment:
+      DATABASE_URL: ecto://postgres:postgres@bets-db:5432/lootify_bets_dev
+      POOL_SIZE: "10"
+      ERLANG_COOKIE: lootify_super_secret_cookie
+      ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min 9000 inet_dist_listen_max 9010"
+    depends_on:
+      bets-db:
+        condition: service_healthy
+    expose:
+      - "4369"
+      - "9101"
+    networks:
+      lootify-network:
+        aliases:
+          - bets.lootify.local
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./lootify_gateway
+      dockerfile: Dockerfile
+    container_name: lootify-gateway
+    hostname: gateway.lootify.local
+    ports:
+      - "4000:4000"
+    environment:
+      SECRET_KEY_BASE: super_secret_key_base_for_phoenix_change_in_production_must_be_at_least_64_bytes
+      PHX_HOST: localhost
+      PORT: "4000"
+      ERLANG_COOKIE: lootify_super_secret_cookie
+      ELIXIR_ERL_OPTIONS: "-kernel inet_dist_listen_min 9000 inet_dist_listen_max 9010"
+    expose:
+      - "4369"
+      - "9000"
+      - "9001"
+      - "9002"
+      - "9003"
+      - "9004"
+      - "9005"
+      - "9006"
+      - "9007"
+      - "9008"
+      - "9009"
+      - "9010"
+    depends_on:
+      - wallets
+      - users
+      - bets
+    networks:
+      lootify-network:
+        aliases:
+          - gateway.lootify.local
+    restart: unless-stopped
+
+volumes:
+  wallets_data:
+  users_data:
+  bets_data:
+
+networks:
+  lootify-network:
+    driver: bridge

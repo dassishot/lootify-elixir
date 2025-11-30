@@ -1,0 +1,14 @@
+# Forçar line endings LF para scripts shell
+*.sh text eol=lf
+*.eex text eol=lf
+rel/**/*.eex text eol=lf
+
+# Elixir files
+*.ex text
+*.exs text
+
+# Config
+*.yml text
+*.yaml text
+*.json text
+

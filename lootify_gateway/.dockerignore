@@ -1,0 +1,30 @@
+# Build artifacts
+_build/
+deps/
+*.ez
+
+# Generated files
+.elixir_ls/
+erl_crash.dump
+
+# Test and dev
+/test/
+/priv/plts/
+cover/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Misc
+*.md
+.formatter.exs
+
